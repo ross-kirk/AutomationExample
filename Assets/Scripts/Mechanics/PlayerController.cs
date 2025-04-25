@@ -1,8 +1,5 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using Platformer.Gameplay;
-using static Platformer.Core.Simulation;
 using Platformer.Model;
 using Platformer.Core;
 
@@ -33,7 +30,9 @@ namespace Platformer.Mechanics
         /*internal new*/ public AudioSource audioSource;
         public Health health;
         public bool controlEnabled = true;
-
+        public ISimulationScheduler scheduler = new SimulationScheduler();
+        public IPlayerInput input = new UnityInputProvider();
+        
         bool jump;
         Vector2 move;
         SpriteRenderer spriteRenderer;
@@ -55,24 +54,31 @@ namespace Platformer.Mechanics
         {
             if (controlEnabled)
             {
-                move.x = Input.GetAxis("Horizontal");
-                if (jumpState == JumpState.Grounded && Input.GetButtonDown("Jump"))
-                    jumpState = JumpState.PrepareToJump;
-                else if (Input.GetButtonUp("Jump"))
-                {
-                    stopJump = true;
-                    Schedule<PlayerStopJump>().player = this;
-                }
+                HandleInput();
             }
             else
             {
                 move.x = 0;
             }
-            UpdateJumpState();
+            HandleJumpState();
             base.Update();
         }
 
-        void UpdateJumpState()
+        public void HandleInput()
+        {
+            move.x = input.Horizontal();
+
+            if (jumpState == JumpState.Grounded && input.JumpPressed())
+            {
+                jumpState = JumpState.PrepareToJump;
+            }
+            else if (input.JumpReleased())
+            {
+                stopJump = true;
+            }
+        }
+        
+        void HandleJumpState()
         {
             jump = false;
             switch (jumpState)
@@ -85,14 +91,14 @@ namespace Platformer.Mechanics
                 case JumpState.Jumping:
                     if (!IsGrounded)
                     {
-                        Schedule<PlayerJumped>().player = this;
+                        scheduler.Schedule<PlayerJumped>().player = this;
                         jumpState = JumpState.InFlight;
                     }
                     break;
                 case JumpState.InFlight:
                     if (IsGrounded)
                     {
-                        Schedule<PlayerLanded>().player = this;
+                        scheduler.Schedule<PlayerLanded>().player = this;
                         jumpState = JumpState.Landed;
                     }
                     break;
