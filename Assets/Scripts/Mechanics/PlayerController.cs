@@ -78,7 +78,7 @@ namespace Platformer.Mechanics
             }
         }
         
-        void HandleJumpState()
+        public void HandleJumpState()
         {
             jump = false;
             switch (jumpState)
