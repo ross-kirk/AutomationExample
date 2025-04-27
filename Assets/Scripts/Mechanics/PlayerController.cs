@@ -43,6 +43,11 @@ namespace Platformer.Mechanics
 
         void Awake()
         {
+            Init();
+        }
+
+        public void Init()
+        {
             health = GetComponent<Health>();
             audioSource = GetComponent<AudioSource>();
             collider2d = GetComponent<Collider2D>();
