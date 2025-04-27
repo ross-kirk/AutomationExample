@@ -1,9 +1,10 @@
 using System.Linq;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using Moq;
 using Platformer.Core;
+using Platformer.Gameplay;
 using Platformer.Mechanics;
+using UnityEngine;
 
 namespace Editor.Tests.GameComponents
 {
@@ -18,12 +19,30 @@ namespace Editor.Tests.GameComponents
             this.playerController = playerController;
             playerController.input = inputMock.Object;
             playerController.scheduler = schedulerMock.Object;
+            
+            schedulerMock.Setup(m => m.Schedule<PlayerJumped>(It.IsAny<float>()))
+                .Returns(() => new PlayerJumped());
+            schedulerMock.Setup(m => m.Schedule<PlayerLanded>(It.IsAny<float>()))
+                .Returns(() => new PlayerLanded());
         }
-
+        
+        /// <summary>
+        /// Reflection search for the backing field for the AutoProperty IsGrounded of the BaseType KinematicObject
+        /// Sets the value of the field, allowing control of grounded state from this test wrapper
+        /// </summary>
+        /// <param name="grounded"></param>
         public void SetGrounded(bool grounded)
         {
-            var groundedProp = typeof(KinematicObject).GetProperty("IsGrounded", BindingFlags.Instance | BindingFlags.NonPublic);
-            groundedProp?.SetValue(playerController, grounded);
+            var isGrounded = playerController.GetType().BaseType?
+                .GetField("<IsGrounded>k__BackingField",BindingFlags.Instance | BindingFlags.NonPublic);
+
+            if (isGrounded == null)
+            {
+                Debug.LogError("Reflection call for IsGrounded not found on player controller");
+                return;
+            }
+            
+            isGrounded.SetValue(playerController, grounded);
         }
 
         public void SimulateJumpPressed()
@@ -54,6 +73,39 @@ namespace Editor.Tests.GameComponents
                 i.Method.Name == "Schedule" &&
                 i.Method.IsGenericMethod &&
                 i.Method.GetGenericArguments()[0] == typeof(T));
+        }
+
+        public void PrepareJump()
+        {
+            SetGrounded(true);
+            SimulateJumpPressed();
+            TickInput();
+        }
+
+        public void StartJump()
+        {
+            PrepareJump();
+            TickJumpState();
+        }
+
+        public void ReachInFLight()
+        {
+            StartJump();
+            SetGrounded(false);
+            TickJumpState();
+        }
+
+        public void Land()
+        {
+            ReachInFLight();
+            SetGrounded(true);
+            TickJumpState();
+        }
+
+        public void Grounded()
+        {
+            Land();
+            TickJumpState();
         }
     }
 }
