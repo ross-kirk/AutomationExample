@@ -43,6 +43,11 @@ namespace Platformer.Mechanics
 
         void Awake()
         {
+            Init();
+        }
+
+        public void Init()
+        {
             health = GetComponent<Health>();
             audioSource = GetComponent<AudioSource>();
             collider2d = GetComponent<Collider2D>();
@@ -78,7 +83,7 @@ namespace Platformer.Mechanics
             }
         }
         
-        void HandleJumpState()
+        public void HandleJumpState()
         {
             jump = false;
             switch (jumpState)
