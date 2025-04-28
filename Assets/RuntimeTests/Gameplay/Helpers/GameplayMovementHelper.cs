@@ -20,14 +20,10 @@ namespace RuntimeTests.Gameplay.Helpers
             player.input = new TestInputProvider(0, false, false);
         }
 
-        public static IEnumerator MoveEnemyAlongPatrol(EnemyController enemy, PatrolPath path, float speed = 2f, float threshold = 0.1f)
+        public static void MoveEnemyAlongPatrol(EnemyController enemy, PatrolPath path, float speed = 2f)
         {
-            var mover = path.CreateMover(speed);
-            while (Vector3.Distance(enemy.transform.position, path.endPosition) > threshold)
-            {
-                enemy.transform.position = mover.Position;
-                yield return null;
-            }
+            path.CreateMover(speed);
+            enemy.path = path;
         }
     }
 }
