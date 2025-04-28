@@ -1,4 +1,5 @@
 using System;
+using Platformer.Core;
 using Platformer.Gameplay;
 using UnityEngine;
 using static Platformer.Core.Simulation;
@@ -22,6 +23,8 @@ namespace Platformer.Mechanics
 
         int currentHP;
 
+        internal ISimulationScheduler _scheduler = new SimulationScheduler();
+
         /// <summary>
         /// Increment the HP of the entity.
         /// </summary>
@@ -39,7 +42,7 @@ namespace Platformer.Mechanics
             currentHP = Mathf.Clamp(currentHP - 1, 0, maxHP);
             if (currentHP == 0)
             {
-                var ev = Schedule<HealthIsZero>();
+                var ev = _scheduler.Schedule<HealthIsZero>();
                 ev.health = this;
             }
         }

@@ -1,3 +1,4 @@
+using Platformer.Core;
 using Platformer.Gameplay;
 using UnityEngine;
 using static Platformer.Core.Simulation;
@@ -21,6 +22,7 @@ namespace Platformer.Mechanics
 
         internal Sprite[] sprites = new Sprite[0];
 
+        internal ISimulationScheduler _scheduler = new SimulationScheduler();
         internal SpriteRenderer _renderer;
 
         //unique index which is assigned by the TokenController in a scene.
@@ -54,7 +56,7 @@ namespace Platformer.Mechanics
             if (controller != null)
                 collected = true;
             //send an event into the gameplay system to perform some behaviour.
-            var ev = Schedule<PlayerTokenCollision>();
+            var ev = _scheduler.Schedule<PlayerTokenCollision>();
             ev.token = this;
             ev.player = player;
         }
