@@ -31,6 +31,7 @@ namespace RuntimeTests.Gameplay.Helpers
             var prefab = Resources.Load<GameObject>(GameDataPaths.PlayerPrefab);
             var gameObj = Object.Instantiate(prefab, position, Quaternion.identity);
             gameObj.name = "Player_TEST";
+            gameObj.AddComponent<AudioListener>(); // stops complaining about no listeners in scene during test
             return gameObj.GetComponent<PlayerController>();
         }
 
