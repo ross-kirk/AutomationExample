@@ -4,9 +4,9 @@ using UnityEngine;
 
 namespace RuntimeTests.Gameplay.Helpers
 {
-    public static class GameplayTestBuilder
+    public static class GameplayTestSpawner
     {
-        public static PlayerController BuildPlayer(Vector3 position)
+        public static PlayerController SpawnPlayer(Vector3 position)
         {
             var prefab = Resources.Load<GameObject>(GameDataPaths.PlayerPrefab);
             var gameObj = Object.Instantiate(prefab, position, Quaternion.identity);
@@ -14,7 +14,7 @@ namespace RuntimeTests.Gameplay.Helpers
             return gameObj.GetComponent<PlayerController>();
         }
 
-        public static EnemyController BuildEnemy(Vector3 position)
+        public static EnemyController SpawnEnemy(Vector3 position)
         {
             var prefab = Resources.Load<GameObject>(GameDataPaths.EnemyPrefab);
             var gameObj = Object.Instantiate(prefab, position, Quaternion.identity);
@@ -22,7 +22,7 @@ namespace RuntimeTests.Gameplay.Helpers
             return gameObj.GetComponent<EnemyController>();
         }
 
-        public static TokenInstance BuildToken(Vector3 position)
+        public static TokenInstance SpawnToken(Vector3 position)
         {
             var gameObj = new GameObject("Token_TEST");
             var token = gameObj.AddComponent<TokenInstance>();
