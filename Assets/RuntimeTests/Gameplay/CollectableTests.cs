@@ -3,14 +3,17 @@ using NUnit.Framework;
 using Platformer.Mechanics;
 using RuntimeTests.Gameplay.Helpers;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 
 namespace RuntimeTests.Gameplay
 {
-    public class CollectableTests
+    public class CollectableTests : GameplayTestBase
     {
         private TokenInstance collectableToken;
         private TokenController controller;
+        private PlayerController player;
+        private EnemyController enemy;
 
         private readonly Vector3 collectablePosition = new Vector3(5, 0, 0);
         
@@ -18,18 +21,14 @@ namespace RuntimeTests.Gameplay
         /// Always create token for new test at the same position
         /// </summary>
         [SetUp]
-        public void SetUp()
+        public override void SetUp()
         {
+            base.SetUp();
+            
             GameplayTestSpawner.SpawnGround(new Vector3(0, -1f, 0));
             collectableToken = GameplayTestSpawner.SpawnToken(collectablePosition);
 
             controller = new GameObject("TokenController_TEST").AddComponent<TokenController>();
-        }
-
-        [TearDown]
-        public void TearDown()
-        {
-            Object.Destroy(collectableToken);
         }
         
         /// <summary>
@@ -39,7 +38,7 @@ namespace RuntimeTests.Gameplay
         [UnityTest]
         public IEnumerator PlayerSpawned_PlayerMovesOverToken_TokenCollected()
         {
-            var player = GameplayTestSpawner.SpawnPlayer(Vector3.zero);
+            player = GameplayTestSpawner.SpawnPlayer(Vector3.zero);
 
             yield return GameplayMovementHelper.MovePlayerToPosition(player, collectablePosition, threshold: 0.2f);
             yield return GameplayWaitHelper.WaitForTokenCollected(collectableToken); 
@@ -50,7 +49,7 @@ namespace RuntimeTests.Gameplay
         [UnityTest]
         public IEnumerator EnemySpawned_EnemyMovesOverToken_NoTokenCollected()
         {
-            var enemy = GameplayTestSpawner.SpawnEnemy(Vector3.zero);
+            enemy = GameplayTestSpawner.SpawnEnemy(Vector3.zero);
             var path = GameplayTestSpawner.CreateEnemyPath(new Vector2(-1, 0), new Vector2(6, 0));
             GameplayMovementHelper.MoveEnemyAlongPatrol(enemy, path);
 
