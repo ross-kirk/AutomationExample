@@ -97,5 +97,17 @@ namespace RuntimeTests.Gameplay.Helpers
             
             return Sprite.Create(texture, new Rect(0,0, width, height), new Vector2(0.5f, 0.5f));
         }
+
+        public static PatrolPath CreateEnemyPath(Vector2 startPos, Vector2 endPos)
+        {
+            var gameObj = new GameObject("PatrolPath_TEST");
+            gameObj.transform.position = Vector3.zero;
+            
+            var path = gameObj.AddComponent<PatrolPath>();
+            path.startPosition = startPos;
+            path.endPosition = endPos;
+
+            return path;
+        }
     }
 }
