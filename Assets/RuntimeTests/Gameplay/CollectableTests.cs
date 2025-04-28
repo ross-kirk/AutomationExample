@@ -46,5 +46,17 @@ namespace RuntimeTests.Gameplay
             
             Assert.IsTrue(collectableToken.collected, "Expected player to collect token when moving towards token");
         }
+
+        [UnityTest]
+        public IEnumerator EnemySpawned_EnemyMovesOverToken_NoTokenCollected()
+        {
+            var enemy = GameplayTestSpawner.SpawnEnemy(Vector3.zero);
+            var path = GameplayTestSpawner.CreateEnemyPath(new Vector2(-1, 0), new Vector2(6, 0));
+            GameplayMovementHelper.MoveEnemyAlongPatrol(enemy, path);
+
+            yield return GameplayWaitHelper.WaitForOverlap(enemy.gameObject, collectableToken.gameObject);
+            
+            Assert.False(collectableToken.collected, "Expected token to not be collected by enemy");
+        }
     }
 }
