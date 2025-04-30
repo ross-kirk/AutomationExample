@@ -115,7 +115,6 @@ namespace RuntimeTests.Gameplay.Helpers
         /// </summary>
         /// <param name="startPos"></param>
         /// <param name="endPos"></param>
-        /// <returns></returns>
         public PatrolPath CreateEnemyPath(Vector2 startPos, Vector2 endPos)
         {
             var gameObj = new GameObject("PatrolPath_TEST");
@@ -126,6 +125,20 @@ namespace RuntimeTests.Gameplay.Helpers
             path.endPosition = endPos;
 
             return path;
+        }
+
+        /// <summary>
+        /// Create death zone at specified position of specified size
+        /// </summary>
+        /// <param name="position"></param>
+        /// <param name="size"></param>
+        public DeathZone CreateDeathZone(Vector3 position, Vector2 size)
+        {
+            var gameObj = new GameObject("DeathZone_TEST");
+            var collider = gameObj.AddComponent<BoxCollider2D>();
+            collider.isTrigger = true;
+            
+            return gameObj.AddComponent<DeathZone>();
         }
     }
 }
