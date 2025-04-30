@@ -1,4 +1,6 @@
+using Platformer.Core;
 using Platformer.Mechanics;
+using Platformer.Model;
 using RuntimeTests.Gameplay.Data;
 using UnityEngine;
 
@@ -43,7 +45,9 @@ namespace RuntimeTests.Gameplay.Helpers
             var gameObj = Object.Instantiate(prefab, position, Quaternion.identity);
             gameObj.name = "Player_TEST";
             gameObj.AddComponent<AudioListener>(); // stops complaining about no listeners in scene during test
-            return gameObj.GetComponent<PlayerController>();
+            var controller = gameObj.GetComponent<PlayerController>();
+            Simulation.GetModel<PlatformerModel>().player = controller;
+            return controller;
         }
 
         /// <summary>
