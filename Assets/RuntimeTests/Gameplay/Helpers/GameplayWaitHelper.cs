@@ -1,6 +1,8 @@
 using System.Collections;
 using Platformer.Mechanics;
+using RuntimeTests.Core;
 using UnityEngine;
+using static RuntimeTests.Core.TestCollisionListener2D;
 
 namespace RuntimeTests.Gameplay.Helpers
 {
@@ -37,6 +39,111 @@ namespace RuntimeTests.Gameplay.Helpers
             {
                 Debug.LogError("Timeout: objects never overlap within threshold.");
             }
+        }
+
+        public IEnumerator WaitForContactWith(GameObject current, GameObject target, ContactType contactType, float timeout = 5f)
+        {
+            if (current == null || target == null)
+            {
+                Debug.LogError("WaitForContactWith: Current or Target objects are null");
+                yield break;
+            }
+
+            var triggered = false;
+            var collided = false;
+
+            var listener = current.AddComponent<TestCollisionListener2D>();
+
+            listener.OnTriggerEntered += other =>
+            {
+                if (other == target) triggered = true;
+            };
+            listener.OnCollisionEntered += other =>
+            {
+                if (other == target) collided = true;
+            };
+
+            var elapsed = 0f;
+            try
+            {
+                yield return new WaitUntil(() =>
+                {
+                    elapsed += Time.deltaTime;
+                    return contactType switch
+                    {
+                        ContactType.Trigger => triggered,
+                        ContactType.Collision => collided,
+                        ContactType.Any => triggered || collided,
+                        _ => false
+                    } || elapsed > timeout;
+                });
+            }
+            finally
+            {
+                Object.Destroy(listener);
+            }
+
+            if ((contactType == ContactType.Trigger && !triggered) ||
+                (contactType == ContactType.Collision && !triggered) ||
+                (contactType == ContactType.Any && !(triggered || collided)))
+            {
+                Debug.LogError($"WaitForContactWith: No trigger entered with {target.name} after {timeout} seconds");
+            }
+        }
+
+        public IEnumerator WaitForAnyContact(GameObject gameObject, ContactType contactType, float timeout = 5f)
+        {
+            if (gameObject == null)
+            {
+                Debug.LogError("WaitForAnyContact: Current object is null");
+                yield break;
+            }
+
+            var triggered = false;
+            var collided = false;
+
+            var listener = gameObject.AddComponent<TestCollisionListener2D>();
+            listener.OnTriggerEntered += _ => triggered = true;
+            listener.OnCollisionEntered += _ => collided = true;
+
+            var elapsed = 0f;
+            try
+            {
+                yield return new WaitUntil(() =>
+                {
+                    elapsed += Time.deltaTime;
+                    return contactType switch
+                    {
+                        ContactType.Trigger => triggered,
+                        ContactType.Collision => collided,
+                        ContactType.Any => triggered || collided,
+                        _ => false
+                    } || elapsed > timeout;
+                });
+            }
+            finally
+            {
+                Object.Destroy(listener);
+            }
+
+            if ((contactType == ContactType.Trigger && !triggered) ||
+                (contactType == ContactType.Collision && !triggered) ||
+                (contactType == ContactType.Any && !(triggered || collided)))
+            {
+                Debug.LogError($"WaitForContactWith: No trigger entered with {gameObject.name} after {timeout} seconds");
+            }
+        }
+
+        public IEnumerator WaitUntilPlayerDeath(PlayerController player, float timeout = 5f)
+        {
+            var elapsed = 0f;
+            while (player.health.IsAlive && elapsed < timeout)
+            {
+                elapsed += Time.deltaTime;
+                yield return null;
+            }
+            
+            
         }
     }
 }

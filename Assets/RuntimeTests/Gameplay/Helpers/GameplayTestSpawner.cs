@@ -1,4 +1,6 @@
+using Platformer.Core;
 using Platformer.Mechanics;
+using Platformer.Model;
 using RuntimeTests.Gameplay.Data;
 using UnityEngine;
 
@@ -7,17 +9,28 @@ namespace RuntimeTests.Gameplay.Helpers
     public class GameplayTestSpawner
     {
         /// <summary>
+        /// Spawn game object with ground collider of specific size for tests
+        /// </summary>
+        /// <param name="position"></param>
+        /// <param name="size"></param>
+        /// <returns></returns>
+        public GameObject SpawnGround(Vector3 position, Vector2 size)
+        {
+            var gameObj = new GameObject("Ground_TEST");
+            var groundCollider = gameObj.AddComponent<BoxCollider2D>();
+            groundCollider.size = size;
+            gameObj.transform.position = position;
+            return gameObj;
+        }
+        
+        /// <summary>
         /// Spawns game object with ground collider 100x1 for tests
         /// </summary>
         /// <param name="position"></param>
         /// <returns></returns>
         public GameObject SpawnGround(Vector3 position)
         {
-            var gameObj = new GameObject("Ground_TEST");
-            var groundCollider = gameObj.AddComponent<BoxCollider2D>();
-            groundCollider.size = new Vector2(100, 1);
-            gameObj.transform.position = position;
-            return gameObj;
+            return SpawnGround(position, new Vector2(100, 1));
         }
         
         /// <summary>
@@ -32,7 +45,9 @@ namespace RuntimeTests.Gameplay.Helpers
             var gameObj = Object.Instantiate(prefab, position, Quaternion.identity);
             gameObj.name = "Player_TEST";
             gameObj.AddComponent<AudioListener>(); // stops complaining about no listeners in scene during test
-            return gameObj.GetComponent<PlayerController>();
+            var controller = gameObj.GetComponent<PlayerController>();
+            Simulation.GetModel<PlatformerModel>().player = controller;
+            return controller;
         }
 
         /// <summary>
@@ -70,7 +85,9 @@ namespace RuntimeTests.Gameplay.Helpers
             token.idleAnimation = new [] {dummySprite};
             token.collectedAnimation = new[] {dummySprite};
             token.sprites = token.idleAnimation;
-                
+
+            token.tokenCollectAudio = CreateDummyAudioClip();
+            
             gameObj.transform.position = position;
             return token;
         }
@@ -104,7 +121,6 @@ namespace RuntimeTests.Gameplay.Helpers
         /// </summary>
         /// <param name="startPos"></param>
         /// <param name="endPos"></param>
-        /// <returns></returns>
         public PatrolPath CreateEnemyPath(Vector2 startPos, Vector2 endPos)
         {
             var gameObj = new GameObject("PatrolPath_TEST");
@@ -115,6 +131,31 @@ namespace RuntimeTests.Gameplay.Helpers
             path.endPosition = endPos;
 
             return path;
+        }
+
+        /// <summary>
+        /// Create death zone at specified position of specified size
+        /// </summary>
+        /// <param name="position"></param>
+        /// <param name="size"></param>
+        public DeathZone CreateDeathZone(Vector3 position, Vector2 size)
+        {
+            var gameObj = new GameObject("DeathZone_TEST");
+            var collider = gameObj.AddComponent<BoxCollider2D>();
+            collider.isTrigger = true;
+            collider.size = size;
+            gameObj.transform.position = position;
+            
+            return gameObj.AddComponent<DeathZone>();
+        }
+
+        /// <summary>
+        /// Create dummy audio clip to avoid programmatically created objects raising nullrefs on PlayAudio calls
+        /// </summary>
+        /// <returns></returns>
+        public AudioClip CreateDummyAudioClip()
+        {
+            return AudioClip.Create("TestClip", 44100, 1, 44100, false);
         }
     }
 }
