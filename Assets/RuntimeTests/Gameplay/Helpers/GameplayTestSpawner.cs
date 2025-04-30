@@ -41,7 +41,7 @@ namespace RuntimeTests.Gameplay.Helpers
         /// <param name="position"></param>
         public PlayerController SpawnPlayer(Vector3 position)
         {
-            var prefab = Resources.Load<GameObject>(GameDataPaths.PlayerPrefab);
+            var prefab = Resources.Load<GameObject>(GameDataPaths.Prefabs.PlayerPrefab);
             var gameObj = Object.Instantiate(prefab, position, Quaternion.identity);
             gameObj.name = "Player_TEST";
             gameObj.AddComponent<AudioListener>(); // stops complaining about no listeners in scene during test
@@ -58,7 +58,7 @@ namespace RuntimeTests.Gameplay.Helpers
         /// <param name="position"></param>
         public EnemyController SpawnEnemy(Vector3 position)
         {
-            var prefab = Resources.Load<GameObject>(GameDataPaths.EnemyPrefab);
+            var prefab = Resources.Load<GameObject>(GameDataPaths.Prefabs.EnemyPrefab);
             var gameObj = Object.Instantiate(prefab, position, Quaternion.identity);
             gameObj.name = "Enemy_TEST";
             return gameObj.GetComponent<EnemyController>();
