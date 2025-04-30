@@ -133,5 +133,17 @@ namespace RuntimeTests.Gameplay.Helpers
                 Debug.LogError($"WaitForContactWith: No trigger entered with {gameObject.name} after {timeout} seconds");
             }
         }
+
+        public IEnumerator WaitUntilPlayerDeath(PlayerController player, float timeout = 5f)
+        {
+            var elapsed = 0f;
+            while (player.health.IsAlive && elapsed < timeout)
+            {
+                elapsed += Time.deltaTime;
+                yield return null;
+            }
+            
+            
+        }
     }
 }
