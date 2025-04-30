@@ -5,7 +5,7 @@ using UnityEngine.TestTools;
 
 namespace RuntimeTests.Gameplay
 {
-    public class EnemyPathTests
+    public class EnemyPathTests : GameplayTestBase
     {
         // A Test behaves as an ordinary method
         [Test]

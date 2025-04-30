@@ -5,7 +5,7 @@ using UnityEngine.TestTools;
 
 namespace RuntimeTests.Gameplay
 {
-    public class PlayerDeathTests
+    public class PlayerDeathTests : GameplayTestBase
     {
         // A Test behaves as an ordinary method
         [Test]
