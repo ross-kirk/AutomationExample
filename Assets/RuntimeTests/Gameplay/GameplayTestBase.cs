@@ -10,11 +10,12 @@ namespace RuntimeTests.Gameplay
         protected GameplayMovementHelper movementHelper;
         protected GameplayTestSpawner testSpawner;
         protected GameplayWaitHelper waitHelper;
+        protected TestInputProvider testInput = new ();
         
         [SetUp]
         public override void SetUp()
         {
-            movementHelper = new GameplayMovementHelper();
+            movementHelper = new GameplayMovementHelper(testInput);
             testSpawner = new GameplayTestSpawner();
             waitHelper = new GameplayWaitHelper();
         }
