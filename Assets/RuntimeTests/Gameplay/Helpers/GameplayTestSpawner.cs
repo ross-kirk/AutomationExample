@@ -85,7 +85,9 @@ namespace RuntimeTests.Gameplay.Helpers
             token.idleAnimation = new [] {dummySprite};
             token.collectedAnimation = new[] {dummySprite};
             token.sprites = token.idleAnimation;
-                
+
+            token.tokenCollectAudio = CreateDummyAudioClip();
+            
             gameObj.transform.position = position;
             return token;
         }
@@ -145,6 +147,15 @@ namespace RuntimeTests.Gameplay.Helpers
             gameObj.transform.position = position;
             
             return gameObj.AddComponent<DeathZone>();
+        }
+
+        /// <summary>
+        /// Create dummy audio clip to avoid programmatically created objects raising nullrefs on PlayAudio calls
+        /// </summary>
+        /// <returns></returns>
+        public AudioClip CreateDummyAudioClip()
+        {
+            return AudioClip.Create("TestClip", 44100, 1, 44100, false);
         }
     }
 }

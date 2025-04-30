@@ -134,6 +134,15 @@ namespace Platformer.Core
             }
             return eventQueue.Count;
         }
+
+#if UNITY_INCLUDE_TESTS
+        // required to unload cached events - some events hold cached instance fields
+        // these instance fields leak between tests when run sequentially, can cause missing ref exceptions
+        public static void ClearPools()
+        {
+            eventPools.Clear(); 
+        }
+#endif
     }
 }
 

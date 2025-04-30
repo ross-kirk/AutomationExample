@@ -48,7 +48,7 @@ namespace RuntimeTests.Gameplay.Helpers
             input.ClearInput();
         }
 
-        public void MoveEnemyAlongPatrol(EnemyController enemy, PatrolPath path, float speed = 2f)
+        public void MoveEnemyAlongPatrol(EnemyController enemy, PatrolPath path, float speed = 5f)
         {
             path.CreateMover(speed);
             enemy.path = path;
