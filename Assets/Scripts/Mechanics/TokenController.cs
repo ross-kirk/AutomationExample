@@ -28,7 +28,7 @@ namespace Platformer.Mechanics
         {
             //if tokens are empty, find all instances.
             //if tokens are not empty, they've been added at editor time.
-            if (tokens.Length == 0)
+            if (tokens == null || tokens.Length == 0)
                 FindAllTokensInScene();
             //Register all tokens so they can work with this controller.
             for (var i = 0; i < tokens.Length; i++)
