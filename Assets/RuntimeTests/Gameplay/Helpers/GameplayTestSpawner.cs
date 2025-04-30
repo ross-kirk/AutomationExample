@@ -4,14 +4,14 @@ using UnityEngine;
 
 namespace RuntimeTests.Gameplay.Helpers
 {
-    public static class GameplayTestSpawner
+    public class GameplayTestSpawner
     {
         /// <summary>
         /// Spawns game object with ground collider 100x1 for tests
         /// </summary>
         /// <param name="position"></param>
         /// <returns></returns>
-        public static GameObject SpawnGround(Vector3 position)
+        public GameObject SpawnGround(Vector3 position)
         {
             var gameObj = new GameObject("Ground_TEST");
             var groundCollider = gameObj.AddComponent<BoxCollider2D>();
@@ -26,7 +26,7 @@ namespace RuntimeTests.Gameplay.Helpers
         /// Returns the PlayerController component of the created object
         /// </summary>
         /// <param name="position"></param>
-        public static PlayerController SpawnPlayer(Vector3 position)
+        public PlayerController SpawnPlayer(Vector3 position)
         {
             var prefab = Resources.Load<GameObject>(GameDataPaths.PlayerPrefab);
             var gameObj = Object.Instantiate(prefab, position, Quaternion.identity);
@@ -41,7 +41,7 @@ namespace RuntimeTests.Gameplay.Helpers
         /// Returns the EnemyController component of the created object
         /// </summary>
         /// <param name="position"></param>
-        public static EnemyController SpawnEnemy(Vector3 position)
+        public EnemyController SpawnEnemy(Vector3 position)
         {
             var prefab = Resources.Load<GameObject>(GameDataPaths.EnemyPrefab);
             var gameObj = Object.Instantiate(prefab, position, Quaternion.identity);
@@ -56,7 +56,7 @@ namespace RuntimeTests.Gameplay.Helpers
         /// Returns the TokenInstance component of the created object
         /// </summary>
         /// <param name="position"></param>
-        public static TokenInstance SpawnToken(Vector3 position)
+        public TokenInstance SpawnToken(Vector3 position)
         {
             var gameObj = new GameObject("Token_TEST");
             gameObj.AddComponent<BoxCollider2D>().isTrigger = true;
@@ -82,7 +82,7 @@ namespace RuntimeTests.Gameplay.Helpers
         /// <param name="width"></param>
         /// <param name="height"></param>
         /// <param name="colour"></param>
-        public static Sprite CreateDummySprite(int width = 10, int height = 10, Color? colour = null)
+        public Sprite CreateDummySprite(int width = 10, int height = 10, Color? colour = null)
         {
             var texture = new Texture2D(width, height);
             var pixels = new Color[width * height];
@@ -99,7 +99,13 @@ namespace RuntimeTests.Gameplay.Helpers
             return Sprite.Create(texture, new Rect(0,0, width, height), new Vector2(0.5f, 0.5f));
         }
 
-        public static PatrolPath CreateEnemyPath(Vector2 startPos, Vector2 endPos)
+        /// <summary>
+        /// Create enemy path to use within the game
+        /// </summary>
+        /// <param name="startPos"></param>
+        /// <param name="endPos"></param>
+        /// <returns></returns>
+        public PatrolPath CreateEnemyPath(Vector2 startPos, Vector2 endPos)
         {
             var gameObj = new GameObject("PatrolPath_TEST");
             gameObj.transform.position = Vector3.zero;

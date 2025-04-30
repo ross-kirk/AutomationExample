@@ -4,9 +4,9 @@ using UnityEngine;
 
 namespace RuntimeTests.Gameplay.Helpers
 {
-    public static class GameplayWaitHelper
+    public class GameplayWaitHelper
     {
-        public static IEnumerator WaitForTokenCollected(TokenInstance token, float timeout = 5f)
+        public IEnumerator WaitForTokenCollected(TokenInstance token, float timeout = 5f)
         {
             var timer = 0f;
 
@@ -22,7 +22,7 @@ namespace RuntimeTests.Gameplay.Helpers
             }
         }
 
-        public static IEnumerator WaitForOverlap(GameObject obj1, GameObject obj2, float threshold = 0.5f, float timeout = 5f)
+        public IEnumerator WaitForOverlap(GameObject obj1, GameObject obj2, float threshold = 0.5f, float timeout = 5f)
         {
             var timer = 0f;
 

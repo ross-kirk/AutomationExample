@@ -25,10 +25,11 @@ namespace RuntimeTests.Gameplay
         {
             base.SetUp();
             
-            GameplayTestSpawner.SpawnGround(new Vector3(0, -1f, 0));
-            collectableToken = GameplayTestSpawner.SpawnToken(collectablePosition);
+            testSpawner.SpawnGround(new Vector3(0, -1f, 0));
+            collectableToken = testSpawner.SpawnToken(collectablePosition);
 
             controller = new GameObject("TokenController_TEST").AddComponent<TokenController>();
+            Assert.IsTrue(controller.tokens.Length > 0, "TokenController length doesn't match expected > 0");
         }
         
         /// <summary>
@@ -38,10 +39,10 @@ namespace RuntimeTests.Gameplay
         [UnityTest]
         public IEnumerator PlayerSpawned_PlayerMovesOverToken_TokenCollected()
         {
-            player = GameplayTestSpawner.SpawnPlayer(Vector3.zero);
+            player = testSpawner.SpawnPlayer(Vector3.zero);
 
-            yield return GameplayMovementHelper.MovePlayerToPosition(player, collectablePosition, threshold: 0.2f);
-            yield return GameplayWaitHelper.WaitForTokenCollected(collectableToken); 
+            yield return movementHelper.MovePlayerToPosition(player, collectablePosition, threshold: 0.2f);
+            yield return waitHelper.WaitForTokenCollected(collectableToken); 
             
             Assert.IsTrue(collectableToken.collected, "Expected player to collect token when moving towards token");
         }
@@ -49,11 +50,11 @@ namespace RuntimeTests.Gameplay
         [UnityTest]
         public IEnumerator EnemySpawned_EnemyMovesOverToken_NoTokenCollected()
         {
-            enemy = GameplayTestSpawner.SpawnEnemy(Vector3.zero);
-            var path = GameplayTestSpawner.CreateEnemyPath(new Vector2(-1, 0), new Vector2(6, 0));
-            GameplayMovementHelper.MoveEnemyAlongPatrol(enemy, path);
+            enemy = testSpawner.SpawnEnemy(Vector3.zero);
+            var path = testSpawner.CreateEnemyPath(new Vector2(-1, 0), new Vector2(6, 0));
+            movementHelper.MoveEnemyAlongPatrol(enemy, path);
 
-            yield return GameplayWaitHelper.WaitForOverlap(enemy.gameObject, collectableToken.gameObject);
+            yield return waitHelper.WaitForOverlap(enemy.gameObject, collectableToken.gameObject);
             
             Assert.False(collectableToken.collected, "Expected token to not be collected by enemy");
         }

@@ -4,9 +4,9 @@ using UnityEngine;
 
 namespace RuntimeTests.Gameplay.Helpers
 {
-    public static class GameplayMovementHelper
+    public class GameplayMovementHelper
     {
-        public static IEnumerator MovePlayerToPosition(PlayerController player, Vector3 targetPos, float speed = 5f, float threshold = 0.2f, float timeout = 5f)
+        public IEnumerator MovePlayerToPosition(PlayerController player, Vector3 targetPos, float speed = 5f, float threshold = 0.2f, float timeout = 5f)
         {
             var elapsed = 0f;
             while (Vector3.Distance(player.transform.position, targetPos) > threshold && elapsed < timeout)
@@ -20,7 +20,7 @@ namespace RuntimeTests.Gameplay.Helpers
             player.input = new TestInputProvider(0, false, false);
         }
 
-        public static void MoveEnemyAlongPatrol(EnemyController enemy, PatrolPath path, float speed = 2f)
+        public void MoveEnemyAlongPatrol(EnemyController enemy, PatrolPath path, float speed = 2f)
         {
             path.CreateMover(speed);
             enemy.path = path;
