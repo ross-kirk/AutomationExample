@@ -137,6 +137,8 @@ namespace RuntimeTests.Gameplay.Helpers
             var gameObj = new GameObject("DeathZone_TEST");
             var collider = gameObj.AddComponent<BoxCollider2D>();
             collider.isTrigger = true;
+            collider.size = size;
+            gameObj.transform.position = position;
             
             return gameObj.AddComponent<DeathZone>();
         }
