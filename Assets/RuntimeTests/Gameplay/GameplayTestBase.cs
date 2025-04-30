@@ -1,6 +1,10 @@
 using NUnit.Framework;
+using Platformer.Core;
+using Platformer.Mechanics;
+using Platformer.Model;
 using RuntimeTests.Core;
 using RuntimeTests.Gameplay.Helpers;
+using Unity.Cinemachine;
 using UnityEngine;
 
 namespace RuntimeTests.Gameplay
@@ -11,12 +15,24 @@ namespace RuntimeTests.Gameplay
         protected GameplayTestSpawner testSpawner;
         protected GameplayWaitHelper waitHelper;
         protected TestInputProvider testInput = new ();
+        protected GameController gameController;
         
         [SetUp]
         public override void SetUp()
         {
             base.SetUp();
 
+            gameController = new GameObject("GameController_TEST").AddComponent<GameController>();
+
+            var spawnPoint = new GameObject("Spawn_TEST");
+            spawnPoint.transform.position = Vector3.zero;
+            
+            var model = new PlatformerModel();
+            model.spawnPoint = spawnPoint.transform;
+            model.virtualCamera = new GameObject("VirtualCam_TEST").AddComponent<CinemachineCamera>();
+            Simulation.SetModel(model);
+            gameController.model = model;
+            
             movementHelper = new GameplayMovementHelper(testInput);
             testSpawner = new GameplayTestSpawner();
             waitHelper = new GameplayWaitHelper();
@@ -32,7 +48,7 @@ namespace RuntimeTests.Gameplay
                     Object.DestroyImmediate(obj);
                 }
             }
-            
+
             base.TearDown();
         }
     }
