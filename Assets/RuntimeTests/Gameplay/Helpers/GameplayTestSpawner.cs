@@ -7,17 +7,28 @@ namespace RuntimeTests.Gameplay.Helpers
     public class GameplayTestSpawner
     {
         /// <summary>
+        /// Spawn game object with ground collider of specific size for tests
+        /// </summary>
+        /// <param name="position"></param>
+        /// <param name="size"></param>
+        /// <returns></returns>
+        public GameObject SpawnGround(Vector3 position, Vector2 size)
+        {
+            var gameObj = new GameObject("Ground_TEST");
+            var groundCollider = gameObj.AddComponent<BoxCollider2D>();
+            groundCollider.size = size;
+            gameObj.transform.position = position;
+            return gameObj;
+        }
+        
+        /// <summary>
         /// Spawns game object with ground collider 100x1 for tests
         /// </summary>
         /// <param name="position"></param>
         /// <returns></returns>
         public GameObject SpawnGround(Vector3 position)
         {
-            var gameObj = new GameObject("Ground_TEST");
-            var groundCollider = gameObj.AddComponent<BoxCollider2D>();
-            groundCollider.size = new Vector2(100, 1);
-            gameObj.transform.position = position;
-            return gameObj;
+            return SpawnGround(position, new Vector2(100, 1));
         }
         
         /// <summary>
