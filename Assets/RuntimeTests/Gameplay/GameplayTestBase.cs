@@ -15,6 +15,8 @@ namespace RuntimeTests.Gameplay
         [SetUp]
         public override void SetUp()
         {
+            base.SetUp();
+
             movementHelper = new GameplayMovementHelper(testInput);
             testSpawner = new GameplayTestSpawner();
             waitHelper = new GameplayWaitHelper();
@@ -30,6 +32,8 @@ namespace RuntimeTests.Gameplay
                     Object.DestroyImmediate(obj);
                 }
             }
+            
+            base.TearDown();
         }
     }
 }
