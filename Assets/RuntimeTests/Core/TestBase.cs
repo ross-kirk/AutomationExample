@@ -1,19 +1,20 @@
-using NUnit.Framework;
+using System.Collections;
+using UnityEngine.TestTools;
 
 namespace RuntimeTests.Core
 {
     public abstract class TestBase
     {
-        [SetUp]
-        public virtual void SetUp()
+        [UnitySetUp]
+        public virtual IEnumerator SetUp()
         {
-            
+            yield return null;
         }
 
-        [TearDown]
-        public virtual void TearDown()
+        [UnityTearDown]
+        public virtual IEnumerator TearDown()
         {
-            
+            yield return null;
         }
         
     }

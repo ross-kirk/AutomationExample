@@ -1,13 +1,15 @@
 using System.Collections;
-using NUnit.Framework;
 using Platformer.Core;
 using Platformer.Mechanics;
 using Platformer.Model;
 using RuntimeTests.Core;
+using RuntimeTests.Gameplay.Data;
 using RuntimeTests.Gameplay.Helpers;
 using Unity.Cinemachine;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
+using Object = UnityEngine.Object;
 
 namespace RuntimeTests.Gameplay
 {
@@ -18,11 +20,15 @@ namespace RuntimeTests.Gameplay
         protected GameplayWaitHelper waitHelper;
         protected TestInputProvider testInput = new ();
         protected GameController gameController;
+
+        protected Scene testScene;
         
-        [SetUp]
-        public override void SetUp()
+        [UnitySetUp]
+        public override IEnumerator SetUp()
         {
-            base.SetUp();
+            yield return base.SetUp();
+
+            yield return TestSceneLoader.CreateAndSetTestScene(scene => testScene = scene);
             
             var spawnPoint = new GameObject("Spawn_TEST");
             spawnPoint.transform.position = Vector3.zero;
@@ -42,19 +48,25 @@ namespace RuntimeTests.Gameplay
             waitHelper = new GameplayWaitHelper();
         }
         
-        [TearDown]
-        public override void TearDown()
+        [UnityTearDown]
+        public override IEnumerator TearDown()
         {
             Simulation.ClearPools();
 
             foreach (var obj in Object.FindObjectsByType<GameObject>(FindObjectsInactive.Include, FindObjectsSortMode.None))
             {
-                if (obj.scene.IsValid() && obj.scene.isLoaded)
+                if (obj.scene == testScene && obj.scene.isLoaded)
                 {
                     Object.DestroyImmediate(obj);
                 }
             }
-            base.TearDown();
+
+            if (testScene.IsValid() && testScene.isLoaded)
+            {
+                yield return TestSceneLoader.UnloadActiveSceneAndReplaceWithFallback();
+            }
+            
+            yield return base.TearDown();
         }
     }
 }

@@ -1,9 +1,7 @@
 using System.Collections;
 using NUnit.Framework;
 using Platformer.Mechanics;
-using RuntimeTests.Gameplay.Helpers;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 
 namespace RuntimeTests.Gameplay
@@ -20,10 +18,10 @@ namespace RuntimeTests.Gameplay
         /// <summary>
         /// Always create token for new test at the same position
         /// </summary>
-        [SetUp]
-        public override void SetUp()
+        [UnitySetUp]
+        public override IEnumerator SetUp()
         {
-            base.SetUp();
+            yield return base.SetUp();
             
             testSpawner.SpawnGround(new Vector3(0, -1f, 0));
             collectableToken = testSpawner.SpawnToken(collectablePosition);

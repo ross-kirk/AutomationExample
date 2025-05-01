@@ -2,7 +2,15 @@ namespace RuntimeTests.Gameplay.Data
 {
     public static class GameDataPaths
     {
-        public const string PlayerPrefab = "Prefabs/Player";
-        public const string EnemyPrefab = "Prefabs/Enemy";
+        public class Prefabs
+        {
+            public const string PlayerPrefab = "Prefabs/Player";
+            public const string EnemyPrefab = "Prefabs/Enemy";
+        }
+
+        public class Scenes
+        {
+            public const string MainScene = "Assets/Scenes/SampleScene.unity";
+        }
     }
 }
