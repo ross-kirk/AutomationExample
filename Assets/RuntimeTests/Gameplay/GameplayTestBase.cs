@@ -3,10 +3,13 @@ using Platformer.Core;
 using Platformer.Mechanics;
 using Platformer.Model;
 using RuntimeTests.Core;
+using RuntimeTests.Gameplay.Data;
 using RuntimeTests.Gameplay.Helpers;
 using Unity.Cinemachine;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
+using Object = UnityEngine.Object;
 
 namespace RuntimeTests.Gameplay
 {
@@ -24,6 +27,8 @@ namespace RuntimeTests.Gameplay
         public override IEnumerator SetUp()
         {
             yield return base.SetUp();
+
+            yield return TestSceneLoader.CreateAndSetTestScene(scene => testScene = scene);
             
             var spawnPoint = new GameObject("Spawn_TEST");
             spawnPoint.transform.position = Vector3.zero;
@@ -50,12 +55,17 @@ namespace RuntimeTests.Gameplay
 
             foreach (var obj in Object.FindObjectsByType<GameObject>(FindObjectsInactive.Include, FindObjectsSortMode.None))
             {
-                if (obj.scene.IsValid() && obj.scene.isLoaded)
+                if (obj.scene == testScene && obj.scene.isLoaded)
                 {
                     Object.DestroyImmediate(obj);
                 }
             }
 
+            if (testScene.IsValid() && testScene.isLoaded)
+            {
+                yield return TestSceneLoader.UnloadActiveSceneAndReplaceWithFallback();
+            }
+            
             yield return base.TearDown();
         }
     }

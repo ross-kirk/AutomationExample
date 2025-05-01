@@ -2,9 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using NUnit.Framework;
 using Platformer.Mechanics;
+using RuntimeTests.Core;
 using RuntimeTests.Gameplay.Data;
+using RuntimeTests.Gameplay.Helpers;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 using UnityEngine.Tilemaps;
 using Utils;
@@ -18,19 +19,14 @@ namespace RuntimeTests.Gameplay
         public override IEnumerator SetUp()
         {
             yield return base.SetUp();
-            SceneManager.LoadScene(GameDataPaths.Scenes.MainScene);
+            yield return TestSceneLoader.LoadMainScene();
         }
 
         [UnityTearDown]
         public override IEnumerator TearDown()
         {
-            var scene = SceneManager.GetSceneByPath(GameDataPaths.Scenes.MainScene);
+            yield return TestSceneLoader.UnloadActiveSceneAndReplaceWithFallback();
             yield return base.TearDown();
-            {
-                var unload = SceneManager.UnloadSceneAsync(scene);
-                while (unload is {isDone: false}) { }
-            }
-            base.TearDown();
         }
 
         [UnityTest]
