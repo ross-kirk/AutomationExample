@@ -1,27 +1,74 @@
 using System.Collections;
+using System.Collections.Generic;
 using NUnit.Framework;
+using Platformer.Mechanics;
+using RuntimeTests.Gameplay.Data;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
+using UnityEngine.Tilemaps;
+using Utils;
+using Object = UnityEngine.Object;
 
 namespace RuntimeTests.Gameplay
 {
     public class EnemyPathTests : GameplayTestBase
     {
-        // A Test behaves as an ordinary method
-        [Test]
-        public void EnemyPathTestsSimplePasses()
+        [SetUp]
+        public override void SetUp()
         {
-            // Use the Assert class to test conditions
+            base.SetUp();
+            SceneManager.LoadScene(GameDataPaths.Scenes.MainScene);
         }
 
-        // A UnityTest behaves like a coroutine in Play Mode. In Edit Mode you can use
-        // `yield return null;` to skip a frame.
-        [UnityTest]
-        public IEnumerator EnemyPathTestsWithEnumeratorPasses()
+        [TearDown]
+        public override void TearDown()
         {
-            // Use the Assert class to test conditions.
-            // Use yield to skip a frame.
+            var scene = SceneManager.GetSceneByPath(GameDataPaths.Scenes.MainScene);
+            if (scene.isLoaded)
+            {
+                var unload = SceneManager.UnloadSceneAsync(scene);
+                while (unload is {isDone: false}) { }
+            }
+            base.TearDown();
+        }
+
+        [UnityTest]
+        public IEnumerator LoadMainScene_ValidateAllPatrolPaths_PatrolPathsValid()
+        {
             yield return null;
+            
+            var enemyHeight = Object.FindFirstObjectByType<EnemyController>().gameObject.transform.localScale.y;
+            var paths = Object.FindObjectsByType<PatrolPath>(FindObjectsSortMode.None);
+            var collider = Object.FindFirstObjectByType<TilemapCollider2D>();
+            
+            Assert.IsNotNull(collider, "Expected collider in scene for level");
+            Assert.IsNotEmpty(paths, "Expected PatrolPaths in scene");
+
+            var invalid = new Dictionary<PatrolPath, (PathValidator.PathValidationError, IReadOnlyList<Vector2>)>();
+            
+            foreach (var path in paths)
+            {
+                var pathValid = PathValidator.ValidatePath(
+                    path,
+                    collider,
+                    (error, points) => invalid[path] = (error, points),
+                    enemyHeight);
+                if(!pathValid) continue;
+            }
+
+            if (invalid.Count > 0)
+            {
+                foreach (var kvp in invalid)
+                {
+                    var point = string.Join(", ", kvp.Value.Item2);
+                    Debug.LogError(
+                        $"Path: '{kvp.Key.name}' -> {kvp.Value.Item1} at {point}");
+                }
+                Assert.Fail($"{invalid.Count} patrol path(s) are invalid, see test log for info.");
+            }
+            
+            Assert.That(invalid.Count == 0);
         }
     }
 
