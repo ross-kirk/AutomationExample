@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Platformer.Mechanics;
@@ -13,8 +12,30 @@ namespace Platformer.Utils
 {
     public static class EditorPathValidatorUtil
     {
-        [MenuItem("Tools/Validate Paths In Current Scene")]
+        [MenuItem("Tools/Level Editor/Validate Paths In Current Scene")]
         public static void ValidatePathsInScene()
+        {
+            RunValidation(Object.FindObjectsByType<PatrolPath>(FindObjectsSortMode.None));
+        }
+
+        [MenuItem("Tools/Level Editor/Validate Selected Patrol Path(s)")]
+        public static void ValidateSelectedPath()
+        {
+            var selected = Selection.gameObjects
+                .Select(gameObject => gameObject.GetComponent<PatrolPath>())
+                .Where(path => path != null).ToArray();
+
+            if (selected.Length == 0)
+            {
+                EditorUtility.DisplayDialog("Path Validator", 
+                    "No paths selected, skipping validation.", "Continue");
+                return;
+            }
+            
+            RunValidation(selected);
+        }
+
+        private static void RunValidation(IEnumerable<PatrolPath> paths)
         {
             var mapCollision = Object.FindFirstObjectByType<TilemapCollider2D>();
             if (mapCollision == null)
@@ -22,32 +43,30 @@ namespace Platformer.Utils
                 Debug.LogError("No TilemapCollider2D found in scene!");
                 return;
             }
-            
-            var paths = Object.FindObjectsByType<PatrolPath>(FindObjectsSortMode.None);
-            var invalidPaths = new Dictionary<GameObject, PathValidationError>();
+
+            var invalidPaths = new Dictionary<GameObject, (PathValidationError,List<Vector2>)>();
 
             foreach (var path in paths)
             {
                 var originalName = path.gameObject.name
                     .Replace("[Obstructed] ", "")
                     .Replace("[MissingGround] ", "");
-                
-                PathValidator.ValidatePath(path, mapCollision, error =>
-                {
-                    invalidPaths[path.gameObject] = error;
-                    path.gameObject.name = error switch
+
+                PathValidator.ValidatePath(
+                    path,
+                    mapCollision,
+                    (error, points) =>
                     {
-                        PathValidationError.Obstructed => $"[Obstructed] {originalName}",
-                        PathValidationError.MissingGround => $"[MissingGround] {originalName}",
-                        _ => originalName;
-                    };
-                });
+                        invalidPaths[path.gameObject] = (error, points.ToList());
+                        var errorPrefix = error == PathValidationError.Obstructed
+                            ? "[Obstructed]"
+                            : "[MissingGround]";
+                        path.gameObject.name = $"{errorPrefix} {originalName}";
+                    });
 
                 if (!invalidPaths.ContainsKey(path.gameObject))
                 {
-                    path.gameObject.name = path.gameObject.name
-                        .Replace("[Obstructed] ", "")
-                        .Replace("[MissingGround] ", "");
+                    path.gameObject.name = originalName;
                 }
             }
 
@@ -55,17 +74,20 @@ namespace Platformer.Utils
             {
                 Selection.objects = invalidPaths.Keys.ToArray();
 
-                foreach (var path in invalidPaths)
+                foreach (var kvp in invalidPaths)
                 {
-                    Debug.LogError($"Invalid PatrolPath '{path.Key}': {path.Value}");
+                    var points = string.Join(", ", kvp.Value.Item2.Select(vec => $"({vec.x:0.##},{vec.y:0.##})"));
+                    Debug.LogError($"Path '{kvp.Key.name}' -> {kvp.Value.Item1}: {points}");
                 }
 
                 EditorUtility.DisplayDialog("Path Validator",
-                    $"Found {invalidPaths.Count} invalid paths in scene, selected in Hierarchy", "Continue");
+                    $"Found {invalidPaths.Count} invalid patrol path(s). They have been selected in the Hierarchy view",
+                    "Continue");
             }
             else
             {
-                EditorUtility.DisplayDialog("Path Validator", "All Patrol Paths in scene are valid!", "Continue");
+                EditorUtility.DisplayDialog("Path Validator",
+                    "All PatrolPaths are valid", "Continue");
             }
         }
     }
