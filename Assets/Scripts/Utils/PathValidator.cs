@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Platformer.Mechanics;
 using UnityEngine;
 using UnityEngine.Tilemaps;
@@ -9,61 +8,68 @@ namespace Utils
 {
     public static class PathValidator
     {
-        public static bool IsObstructed(PatrolPath path, TilemapCollider2D collider)
+        public static bool IsObstructed(PatrolPath path, TilemapCollider2D collider, out List<Vector2> obstructionPoints)
         {
             var start = path.transform.TransformPoint(path.startPosition);
             var end = path.transform.TransformPoint(path.endPosition);
 
-            var samples = Mathf.CeilToInt(Vector2.Distance(start, end));
+            obstructionPoints = new List<Vector2>();
 
+            var samples = Mathf.CeilToInt(Vector2.Distance(start, end));
             for (var i = 0; i <= samples; i++)
             {
                 var point = Vector2.Lerp(start, end, i / (float) samples);
                 if (collider.OverlapPoint(point))
                 {
                     Debug.DrawLine(point + Vector2.down * 0.2f, point + Vector2.up * 0.2f, Color.red, 60f);
-                    return true;
+                    obstructionPoints.Add(point);
                 }
             }
-            return false;
+            return obstructionPoints.Count > 0;
         }
 
-        public static bool IsGroundValid(PatrolPath path, TilemapCollider2D collider, float enemyHeight = 1f)
+        public static bool IsGroundValid(PatrolPath path, TilemapCollider2D collider, out List<Vector2> missingGroundPoints, float enemyHeight)
         {
             var start = path.transform.TransformPoint(path.startPosition);
             var end = path.transform.TransformPoint(path.endPosition);
 
+            missingGroundPoints = new List<Vector2>();
+            
             var samples = Mathf.CeilToInt(Vector2.Distance(start, end));
+            var rayLength = enemyHeight + 0.01f;
 
             for (var i = 0; i <= samples; i++)
             {
                 var point = Vector2.Lerp(start, end, i / (float) samples);
-                var groundCheck = point + Vector2.down * enemyHeight;
-                if (!collider.OverlapPoint(groundCheck))
+                var origin = point + Vector2.up * 0.01f;
+
+                var hit = Physics2D.Raycast(origin, Vector2.down, rayLength);
+                
+                if (hit.collider == null || !hit.collider == collider)
                 {
-                    Debug.DrawLine(point, groundCheck, Color.yellow, 60f);
-                    return false;
+                    Debug.DrawLine(point, origin + Vector2.down * rayLength, Color.yellow, 60f);
+                    missingGroundPoints.Add(point);
                 }
             }
 
-            return true;
+            return missingGroundPoints.Count == 0;
         }
 
-        public static bool ValidatePath(PatrolPath path, TilemapCollider2D collider,  Action<PathValidationError> onError, float enemyHeight = 1f)
+        public static bool ValidatePath(PatrolPath path, TilemapCollider2D collider,  Action<PathValidationError, IReadOnlyList<Vector2>> onError, float enemyHeight = 1f)
         {
-            if (IsObstructed(path, collider))
-            {
-                onError?.Invoke(PathValidationError.Obstructed);
-                return false;
-            }
+            var obstructed = IsObstructed(path, collider, out var obstructedPoints);
+            var missingGround = !IsGroundValid(path, collider, out var missingGroundPoints, enemyHeight);
 
-            if (!IsGroundValid(path, collider, enemyHeight))
+            if (obstructed)
             {
-                onError?.Invoke(PathValidationError.MissingGround);
-                return false;
+                onError?.Invoke(PathValidationError.Obstructed, obstructedPoints);
             }
-
-            return true;
+            if (missingGround)
+            {
+                onError?.Invoke(PathValidationError.MissingGround, missingGroundPoints);
+            }
+            
+            return obstructed || missingGround;
         }
 
         public enum PathValidationError
