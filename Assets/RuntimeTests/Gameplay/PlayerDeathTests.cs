@@ -11,10 +11,10 @@ namespace RuntimeTests.Gameplay
     {
         private PlayerController player;
 
-        [SetUp]
-        public override void SetUp()
+        [UnitySetUp]
+        public override IEnumerator SetUp()
         {
-            base.SetUp();
+            yield return base.SetUp();
 
             player = testSpawner.SpawnPlayer(new Vector3(0, 0));
         }

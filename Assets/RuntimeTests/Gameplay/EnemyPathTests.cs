@@ -12,20 +12,20 @@ using Object = UnityEngine.Object;
 
 namespace RuntimeTests.Gameplay
 {
-    public class EnemyPathTests : GameplayTestBase
+    public class EnemyPathTests : TestBase
     {
-        [SetUp]
-        public override void SetUp()
+        [UnitySetUp]
+        public override IEnumerator SetUp()
         {
-            base.SetUp();
+            yield return base.SetUp();
             SceneManager.LoadScene(GameDataPaths.Scenes.MainScene);
         }
 
-        [TearDown]
-        public override void TearDown()
+        [UnityTearDown]
+        public override IEnumerator TearDown()
         {
             var scene = SceneManager.GetSceneByPath(GameDataPaths.Scenes.MainScene);
-            if (scene.isLoaded)
+            yield return base.TearDown();
             {
                 var unload = SceneManager.UnloadSceneAsync(scene);
                 while (unload is {isDone: false}) { }

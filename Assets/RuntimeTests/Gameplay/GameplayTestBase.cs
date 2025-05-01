@@ -1,5 +1,4 @@
 using System.Collections;
-using NUnit.Framework;
 using Platformer.Core;
 using Platformer.Mechanics;
 using Platformer.Model;
@@ -18,11 +17,13 @@ namespace RuntimeTests.Gameplay
         protected GameplayWaitHelper waitHelper;
         protected TestInputProvider testInput = new ();
         protected GameController gameController;
+
+        protected Scene testScene;
         
-        [SetUp]
-        public override void SetUp()
+        [UnitySetUp]
+        public override IEnumerator SetUp()
         {
-            base.SetUp();
+            yield return base.SetUp();
             
             var spawnPoint = new GameObject("Spawn_TEST");
             spawnPoint.transform.position = Vector3.zero;
@@ -42,8 +43,8 @@ namespace RuntimeTests.Gameplay
             waitHelper = new GameplayWaitHelper();
         }
         
-        [TearDown]
-        public override void TearDown()
+        [UnityTearDown]
+        public override IEnumerator TearDown()
         {
             Simulation.ClearPools();
 
@@ -54,7 +55,8 @@ namespace RuntimeTests.Gameplay
                     Object.DestroyImmediate(obj);
                 }
             }
-            base.TearDown();
+
+            yield return base.TearDown();
         }
     }
 }
