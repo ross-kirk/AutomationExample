@@ -4,6 +4,7 @@ using System.Linq;
 using Platformer.Mechanics;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Tilemaps;
 using Utils;
 using Object = UnityEngine.Object;
 using PathValidationError = Utils.PathValidator.PathValidationError;
@@ -15,51 +16,56 @@ namespace Platformer.Utils
         [MenuItem("Tools/Validate Paths In Current Scene")]
         public static void ValidatePathsInScene()
         {
+            var mapCollision = Object.FindFirstObjectByType<TilemapCollider2D>();
+            if (mapCollision == null)
+            {
+                Debug.LogError("No TilemapCollider2D found in scene!");
+                return;
+            }
+            
             var paths = Object.FindObjectsByType<PatrolPath>(FindObjectsSortMode.None);
             var invalidPaths = new Dictionary<GameObject, PathValidationError>();
 
             foreach (var path in paths)
             {
-                var originalName = path.gameObject.name;
-                originalName = originalName.Replace("[Blocked] ", "").Replace("[MissingGround] ", "");
-
-                PathValidator.ValidatePathByTile(path, error =>
+                var originalName = path.gameObject.name
+                    .Replace("[Obstructed] ", "")
+                    .Replace("[MissingGround] ", "");
+                
+                PathValidator.ValidatePath(path, mapCollision, error =>
                 {
-                    invalidPaths.TryAdd(path.gameObject, error);
+                    invalidPaths[path.gameObject] = error;
+                    path.gameObject.name = error switch
+                    {
+                        PathValidationError.Obstructed => $"[Obstructed] {originalName}",
+                        PathValidationError.MissingGround => $"[MissingGround] {originalName}",
+                        _ => originalName;
+                    };
                 });
 
-                if (invalidPaths.TryGetValue(path.gameObject, out var errorType))
+                if (!invalidPaths.ContainsKey(path.gameObject))
                 {
-                    var prefix = errorType switch
-                    {
-                        PathValidationError.Blocked => "[Blocked] ",
-                        PathValidationError.MissingGround => "[MissingGround]",
-                        _ => "[Invalid] "
-                    };
-                    path.gameObject.name = prefix + originalName;
-                }
-                else
-                {
-                    path.gameObject.name = originalName;
+                    path.gameObject.name = path.gameObject.name
+                        .Replace("[Obstructed] ", "")
+                        .Replace("[MissingGround] ", "");
                 }
             }
 
-            if (invalidPaths.Count > 0)
+            if (invalidPaths.Any())
             {
-                foreach (var kvp in invalidPaths)
+                Selection.objects = invalidPaths.Keys.ToArray();
+
+                foreach (var path in invalidPaths)
                 {
-                    var reason = kvp.Value == PathValidationError.Blocked ? "Blocked by tile" : "Missing ground below";
-                    Debug.LogError($"[PATH VALIDATOR] - Invalid Path: {kvp.Key.name} - {reason}", kvp.Key);
+                    Debug.LogError($"Invalid PatrolPath '{path.Key}': {path.Value}");
                 }
 
-                Selection.objects = invalidPaths.Keys.ToArray();
-                EditorUtility.DisplayDialog("PATH VALIDATOR",
-                    $"Highlighted {invalidPaths.Count} invalid patrol paths in scene", "Continue");
-                Debug.Log($"[PATH VALIDATOR] - Highlighted {invalidPaths.Count} invalid patrol paths in scene");
+                EditorUtility.DisplayDialog("Path Validator",
+                    $"Found {invalidPaths.Count} invalid paths in scene, selected in Hierarchy", "Continue");
             }
             else
             {
-                EditorUtility.DisplayDialog("PATH VALIDATOR", "All paths valid!", "Continue");
+                EditorUtility.DisplayDialog("Path Validator", "All Patrol Paths in scene are valid!", "Continue");
             }
         }
     }
