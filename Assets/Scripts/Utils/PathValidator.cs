@@ -45,7 +45,7 @@ namespace Utils
 
                 var hit = Physics2D.Raycast(origin, Vector2.down, rayLength);
                 
-                if (hit.collider == null || !hit.collider == collider)
+                if (hit.collider == null || hit.collider != collider)
                 {
                     Debug.DrawLine(point, origin + Vector2.down * rayLength, Color.yellow, 60f);
                     missingGroundPoints.Add(point);
@@ -69,7 +69,7 @@ namespace Utils
                 onError?.Invoke(PathValidationError.MissingGround, missingGroundPoints);
             }
             
-            return obstructed || missingGround;
+            return !(obstructed || missingGround);
         }
 
         public enum PathValidationError
