@@ -10,7 +10,7 @@ namespace RuntimeTests.Gameplay.Data
 
         public class Scenes
         {
-            public const string MainScene = "Scenes/MainScene";
+            public const string MainScene = "Scenes/SampleScene";
         }
     }
 }
